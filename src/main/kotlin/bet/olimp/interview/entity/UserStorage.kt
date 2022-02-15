@@ -18,7 +18,7 @@ class UserStorage private constructor() {
     }
 
     fun insertData(user: User) {
-        if (user.name == ""){
+        if (user.name == "") {
             throw Exception("Name cannot be empty")
         }
         data.add(user)
