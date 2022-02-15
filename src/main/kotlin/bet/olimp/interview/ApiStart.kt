@@ -11,7 +11,12 @@ object ApiStart {
     fun main(args: Array<String>) {
         routes(
             pingGetHandler,
-            pingPostHandler
+            pingPostHandler,
+            getAll,
+            getById,
+            saveUser,
+            updateUser,
+            deleteUser
         ).asServer(Undertow(8080))
             .start()
     }
