@@ -1,39 +1,56 @@
 package bet.olimp.interview.handler
 
 import bet.olimp.interview.entity.User
+import bet.olimp.interview.service.UserServiceImpl
+import org.http4k.core.Body
 import org.http4k.core.Method
 import org.http4k.core.Response
 import org.http4k.core.Status
+import org.http4k.format.Jackson.auto
 import org.http4k.routing.bind
 import org.http4k.routing.path
 
-const val prefix = "api/v1/users"
+val userService = UserServiceImpl()
+const val PREFIX = "api/v1/users"
+private val userResponseLens = Body.auto<User>().toLens()
+private val usersResponseLens = Body.auto<List<User>>().toLens()
+private val userRequestLens = Body.auto<User>().toLens()
 
-val getAll = prefix bind Method.GET to {
-    println("get all")
-    Response.invoke(Status.OK).body("get all")
+val getAll = PREFIX bind Method.GET to {
+    usersResponseLens.inject(userService.findAll(), Response(Status.OK))
 }
-val getById = "$prefix/{id}" bind Method.GET to {
-    println("get by id: " + it.path("id"))
-    Response.invoke(Status.OK).body("get by id: " + it.path("id"))
+val getById = "$PREFIX/{id}" bind Method.GET to {
+    val userId = try {
+        it.path("id")?.toInt() ?: -1
+    } catch (e: Exception) {
+        -1
+    }
+    if (userId != -1) {
+        val user = userService.findById(userId)
+        userResponseLens.inject(user, Response(Status.OK))
+    } else {
+        Response.invoke(Status.BAD_REQUEST).body("User ID is not correct")
+    }
 }
 
-val saveUser = prefix bind Method.POST to {
+val saveUser = PREFIX bind Method.POST to {
     val user = parsingUserFromString(it.bodyString())
-    println(user.toString())
-    Response.invoke(Status.CREATED).body(user.toString())
+    userRequestLens.inject(userService.save(user), Response(Status.CREATED))
 }
 
-val updateUser = prefix bind Method.PUT to {
+val updateUser = PREFIX bind Method.PUT to {
     val user = parsingUserFromString(it.bodyString())
-    println(user.toString())
-    Response.invoke(Status.CREATED).body(user.toString())
+    userRequestLens.inject(userService.save(user), Response(Status.OK))
 }
 
-val deleteUser = prefix bind Method.DELETE to {
+val deleteUser = PREFIX bind Method.DELETE to {
     val user = parsingUserFromString(it.bodyString())
-    println(user.toString())
-    Response.invoke(Status.CREATED).body(user.toString())
+    if (user.id != -1) {
+        userService.delete(user.id)
+        Response.invoke(Status.NO_CONTENT)
+    } else {
+        Response.invoke(Status.BAD_REQUEST).body("User ID is not correct")
+    }
 }
 
 private fun parsingUserFromString(str: String): User {
@@ -47,10 +64,14 @@ private fun parsingUserFromString(str: String): User {
         val res = Regex("[^A-Za-z0-9\" ]")
             .replace(i.substring(0, i.indexOf("----------------------------")), "")
 
-        if (res.split("\"")[0] == "id"){
-            userId = res.split("\"")[1].toInt()
+        if (res.split("\"")[0] == "id") {
+            userId = try {
+                res.split("\"")[1].toInt()
+            } catch (e: Exception) {
+                -1
+            }
         }
-        if (res.split("\"")[0] == "name"){
+        if (res.split("\"")[0] == "name") {
             userName = res.split("\"")[1]
         }
     }
