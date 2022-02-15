@@ -17,7 +17,7 @@ class UserRepositoryImpl : UserRepository {
     }
 
     override fun save(user: User): User {
-        val newUser = User(userStorage.findAll().size, user.name)
+        val newUser = User(userStorage.dataSize(), user.name)
         userStorage.insertData(newUser)
         return newUser
     }
