@@ -29,7 +29,7 @@ val getById = "$PREFIX/{id}" bind Method.GET to {
         val user = userService.findById(userId)
         userResponseLens.inject(user, Response(Status.OK))
     } else {
-        Response.invoke(Status.BAD_REQUEST).body("User ID is not correct")
+        throw Exception("User ID is not correct")
     }
 }
 
@@ -49,7 +49,7 @@ val deleteUser = PREFIX bind Method.DELETE to {
         userService.delete(user.id)
         Response.invoke(Status.NO_CONTENT)
     } else {
-        Response.invoke(Status.BAD_REQUEST).body("User ID is not correct")
+        throw Exception("User ID is not correct")
     }
 }
 
