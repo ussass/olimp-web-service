@@ -1,0 +1,15 @@
+build
+target
+
+# Intellij
+.idea/
+*.iml
+*.iws
+*.class
+*.jar
+*.zip
+*.tar.gz
+*.rar
+out/
+
+.gradle/
