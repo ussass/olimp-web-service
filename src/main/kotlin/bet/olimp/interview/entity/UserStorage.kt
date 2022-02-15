@@ -30,8 +30,17 @@ class UserStorage private constructor() {
         data[userId] = user
     }
 
-    fun findAll() = data
+    fun findAll(): List<User> {
+        val resultList = mutableListOf<User>()
+        for (user in data) {
+            if (user.name != "") {
+                resultList.add(user)
+            }
+        }
+        return resultList
+    }
 
     fun findById(userId: Int) = data[userId]
 
+    fun dataSize() = data.size
 }
